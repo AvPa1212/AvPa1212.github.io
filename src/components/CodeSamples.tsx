@@ -103,7 +103,13 @@ export default function CodeSamples() {
   )
 }
 
-function ResultCard({ title, value }: any) {
+function ResultCard({
+  title,
+  value,
+}: {
+  title: string
+  value: number | [string, number][]
+}) {
   return (
     <motion.div
       initial={{ y: 30, opacity: 0 }}

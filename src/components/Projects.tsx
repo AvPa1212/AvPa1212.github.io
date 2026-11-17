@@ -1,161 +1,51 @@
-import { motion } from "framer-motion";
-import { useState } from "react";
-import ProjectCard from "./ProjectCard";
-import CodeBlock from "./CodeBlock";
+import { useMemo, useState } from "react";
+import ProjectCard, { type Project } from "./ProjectCard";
 import WiresharkAnalyzer from "./WiresharkAnalyzer";
 
-const pythonCode = `import csv
-from collections import Counter
-from typing import Dict, Any
+const projects: Project[] = [
+  { title: "PhysEngine", description: "A 2D rigid-body physics engine with impulse-based collision resolution, AABB detection, and a browser demo.", tech: ["C++", "Physics", "WebAssembly"], github: "https://github.com/AvPa1212/PhysEngine", live: "https://phys-todo-list.vercel.app", category: "Systems", featured: true },
+  { title: "Live Tech Internships", description: "A freshness-sorted directory of thousands of open technology roles, normalized and updated automatically from public sources.", tech: ["Python", "Automation", "Data"], github: "https://github.com/AvPa1212/live-tech-internships", category: "Tools", featured: true },
+  { title: "Kana Dojo", description: "A focused, minimalist platform for learning Japanese kana through quick, repeatable practice.", tech: ["Next.js", "TypeScript", "UI"], github: "https://github.com/AvPa1212/kana-dojo", live: "https://kanadojo.com", category: "Web & Apps" },
+  { title: "StrikeSense", description: "A web experience for exploring baseball strike-zone data and turning it into useful visual feedback.", tech: ["Python", "Data", "Web"], github: "https://github.com/AvPa1212/StrikeSense", live: "https://strike-sense-three.vercel.app", category: "Web & Apps" },
+  { title: "Circuit Simulator", description: "An online display and playground for circuit simulator code, connecting hardware curiosity with approachable interfaces.", tech: ["HTML", "Circuits", "JavaScript"], github: "https://github.com/AvPa1212/Circuit-Simulator", category: "Experiments" },
+  { title: "VibeCalc", description: "A practical calculator app experiment built for quick, friendly interactions on mobile.", tech: ["Dart", "Flutter"], github: "https://github.com/AvPa1212/VibeCalc", category: "Web & Apps" },
+  { title: "EnderGames", description: "A teleporting-themed Kit SurvivalGames mode with random maps and classic post-1.8 PvP.", tech: ["Java", "Minecraft", "Game design"], github: "https://github.com/AvPa1212/EnderGames", category: "Experiments" },
+  { title: "Pirate Hunt", description: "A game prototype exploring playful multiplayer mechanics and themed interaction.", tech: ["Game dev", "Java"], github: "https://github.com/AvPa1212/Pirate-Hunt", category: "Experiments" },
+];
 
-
-class WiresharkLogParser:
-    """
-    Parses Wireshark CSV export and computes traffic statistics.
-    Expected CSV columns:
-    No., Time, Source, Destination, Protocol, Length, Info
-    """
-
-    def __init__(self, filePath: str):
-        self.filePath = filePath
-        self.protocolCounts = Counter()
-        self.srcIpCounts = Counter()
-        self.dstIpCounts = Counter()
-        self.tcpFlagCounts = Counter()
-        self.totalPackets = 0
-        self.totalBytes = 0
-
-    def parseFile(self) -> None:
-        with open(self.filePath, newline='', encoding='utf-8') as csvFile:
-            reader = csv.DictReader(csvFile)
-
-            for row in reader:
-                self.totalPackets += 1
-
-                # Protocol statistics
-                protocol = row.get("Protocol", "").strip()
-                if protocol:
-                    self.protocolCounts[protocol] += 1
-
-                # Source/Destination statistics
-                sourceIp = row.get("Source", "").strip()
-                destinationIp = row.get("Destination", "").strip()
-
-                if sourceIp:
-                    self.srcIpCounts[sourceIp] += 1
-                if destinationIp:
-                    self.dstIpCounts[destinationIp] += 1
-
-                # Packet size aggregation
-                lengthValue = row.get("Length", "").strip()
-                if lengthValue.isdigit():
-                    self.totalBytes += int(lengthValue)
-
-                # TCP flag extraction
-                infoField = row.get("Info", "")
-                self.extractTcpFlags(infoField)
-
-    def extractTcpFlags(self, infoField: str) -> None:
-        flagList = ["SYN", "ACK", "FIN", "RST", "PSH", "URG"]
-        for flag in flagList:
-            if flag in infoField:
-                self.tcpFlagCounts[flag] += 1
-
-    def generateSummary(self) -> Dict[str, Any]:
-        return {
-            "totalPackets": self.totalPackets,
-            "totalBytes": self.totalBytes,
-            "protocolDistribution": dict(self.protocolCounts),
-            "top5Sources": self.srcIpCounts.most_common(5),
-            "top5Destinations": self.dstIpCounts.most_common(5),
-            "tcpFlagCounts": dict(self.tcpFlagCounts),
-        }
-
-
-if __name__ == "__main__":
-    parser = WiresharkLogParser("capture.csv")
-    parser.parseFile()
-
-    stats = parser.generateSummary()
-
-    print("\n=== Wireshark Traffic Summary ===")
-    print(f"Total Packets: {stats['totalPackets']}")
-    print(f"Total Bytes: {stats['totalBytes']}\n")
-
-    print("Protocol Distribution:")
-    for protocol, count in stats["protocolDistribution"].items():
-        print(f"  {protocol}: {count}")
-
-    print("\nTop 5 Source IPs:")
-    for ip, count in stats["top5Sources"]:
-        print(f"  {ip}: {count}")
-
-    print("\nTop 5 Destination IPs:")
-    for ip, count in stats["top5Destinations"]:
-        print(f"  {ip}: {count}")
-
-    print("\nTCP Flag Counts:")
-    for flag, count in stats["tcpFlagCounts"].items():
-        print(f"  {flag}: {count}")`;
+const categories = ["All", "Systems", "Web & Apps", "Tools", "Experiments"] as const;
 
 export default function Projects() {
-  const [showCode, setShowCode] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<(typeof categories)[number]>("All");
+  const [query, setQuery] = useState("");
+  const visibleProjects = useMemo(() => projects.filter((project) => {
+    const matchesCategory = activeCategory === "All" || project.category === activeCategory;
+    const searchText = `${project.title} ${project.description} ${project.tech.join(" ")}`.toLowerCase();
+    return matchesCategory && searchText.includes(query.toLowerCase());
+  }), [activeCategory, query]);
 
   return (
-    <section
-      id="projects"
-      style={{ padding: "6rem 2rem", maxWidth: "1200px", margin: "0 auto" }}
-    >
-      <h2 style={{ fontSize: "2.8rem", marginBottom: "3rem" }}>
-        Projects
-      </h2>
-
-      {/* Main Projects */}
-      <motion.div
-        initial={{ opacity: 0, y: 60 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8 }}
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-          gap: "2rem",
-        }}
-      >
-        <ProjectCard
-          title="C++ Physics Engine"
-          description="2D rigid body simulation implementing impulse-based collision resolution and AABB detection."
-          tech={["C++", "Physics", "Linear Algebra"]}
-          github="https://github.com/AvPa1212/PhysEngine"
-        />
-      </motion.div>
-
-      {/* Code Samples Section */}
-      <section style={{ marginTop: "6rem" }}>
-        <h2 style={{ fontSize: "2.5rem", marginBottom: "2rem" }}>
-          Code Samples
-        </h2>
-
-        <h3>Wireshark Traffic Analyzer</h3>
-
-        <button
-          onClick={() => setShowCode(!showCode)}
-          style={{
-            marginBottom: "1.5rem",
-            padding: "0.6rem 1.2rem",
-            borderRadius: "8px",
-            cursor: "pointer",
-          }}
-        >
-          {showCode ? "Hide Code" : "Show Code"}
-        </button>
-
-        {showCode && (
-          <CodeBlock code={pythonCode} language="python" />
-        )}
-
+    <>
+      <section className="work-section" id="work">
+        <div className="section-heading">
+          <div><p className="eyebrow">Selected work</p><h2>Things I&apos;ve built<span>.</span></h2></div>
+          <p className="section-note">A growing collection of technical experiments, practical tools, and systems-focused builds.</p>
+        </div>
+        <div className="project-toolbar">
+          <div className="category-tabs" role="tablist" aria-label="Filter projects">
+            {categories.map((category) => <button key={category} className={activeCategory === category ? "active" : ""} onClick={() => setActiveCategory(category)}>{category}</button>)}
+          </div>
+          <label className="search-box"><span aria-hidden="true">⌕</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search projects" aria-label="Search projects" /></label>
+        </div>
+        <div className="project-grid">
+          {visibleProjects.map((project, index) => <ProjectCard key={project.title} {...project} index={index} />)}
+        </div>
+        {visibleProjects.length === 0 && <div className="empty-state">No projects match that search.</div>}
+      </section>
+      <section className="lab-section" id="lab">
+        <div className="section-heading compact"><div><p className="eyebrow">Interactive lab</p><h2>See code in motion<span>.</span></h2></div><p className="section-note">Upload a Wireshark CSV export and inspect its traffic at a glance.</p></div>
         <WiresharkAnalyzer />
       </section>
-    </section>
+    </>
   );
 }

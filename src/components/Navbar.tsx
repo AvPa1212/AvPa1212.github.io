@@ -1,21 +1,17 @@
 export default function Navbar() {
   return (
-    <nav
-      style={{
-        padding: "1.5rem 2rem",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        borderBottom: "1px solid #222"
-      }}
-    >
-      <div style={{ fontWeight: 700 }}>AVPA</div>
-      <div style={{ display: "flex", gap: "2rem", color: "var(--muted)" }}>
-        <a href="#projects">Projects</a>
-        <a href="https://github.com/AvPa1212" target="_blank">
-          GitHub
+    <header className="site-header">
+      <a className="brand" href="#top" aria-label="Avi Panchasara home">
+        <span className="brand-mark">AP</span>
+        <span>avi<span className="brand-dot">.</span>dev</span>
+      </a>
+      <nav className="nav-links" aria-label="Primary navigation">
+        <a href="#work">Work</a>
+        <a href="#about">About</a>
+        <a className="nav-github" href="https://github.com/AvPa1212" target="_blank" rel="noreferrer">
+          GitHub <span aria-hidden="true">↗</span>
         </a>
-      </div>
-    </nav>
+      </nav>
+    </header>
   );
 }
