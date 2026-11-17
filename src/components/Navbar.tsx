@@ -7,7 +7,8 @@ export default function Navbar() {
       </a>
       <nav className="nav-links" aria-label="Primary navigation">
         <a href="#work">Work</a>
-        <a href="#about">About</a>
+        <a href="#/about">About</a>
+        <a href="#/resume">Resume</a>
         <a className="nav-github" href="https://github.com/AvPa1212" target="_blank" rel="noreferrer">
           GitHub <span aria-hidden="true">↗</span>
         </a>

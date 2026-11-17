@@ -1,0 +1,21 @@
+Avi Panchasara
+Electrical Engineering student | Virginia Tech | Class of 2029
+
+PROFILE
+Systems-minded student developer interested in computer architecture, embedded systems, and performance optimization.
+
+SELECTED PROJECTS
+PhysEngine — C++, physics simulation, WebAssembly
+Live Tech Internships — Python, automation, data
+Kana Dojo — Next.js, TypeScript, UI
+Circuit Simulator — HTML, circuits, JavaScript
+
+TECHNICAL SKILLS
+C++, TypeScript, Java, Python, React, Next.js, Rust/WASM, Git, Linux
+
+LINKS
+https://github.com/AvPa1212
+https://avpa1212.github.io
+
+PII REDACTION NOTICE
+Phone, email, street address, and other direct personal identifiers have been removed.
